@@ -4,27 +4,45 @@
 //
 // Modular Framework for OpenGLES2 rendering on multiple platforms.
 //
-namespace octet {
+#include "../../octet.h"
+#include "IRenderer.h"
+#include "LineRenderer.h"
+#include "Rule.h"
+#include "LSystemInstance.h"
+
+namespace LSys 
+{
   /// Scene containing a box with octet.
-  class LSystem : public app {
+  class LSystem : public octet::app 
+  {
     // scene for drawing box
-    ref<visual_scene> app_scene;
+    octet::ref<octet::visual_scene> app_scene;
+	octet::dynarray<LSystemInstance> systems;
+	
   public:
     /// this is called when we construct the class before everything is initialised.
     LSystem(int argc, char **argv) : app(argc, argv) {
     }
 
     /// this is called once OpenGL is initialized
-    void app_init() {
-      app_scene =  new visual_scene();
+    void app_init() 
+	{
+      app_scene =  new octet::visual_scene();
       app_scene->create_default_camera_and_lights();
 
-      material *red = new material(vec4(1, 0, 0, 1));
-      mesh_box *box = new mesh_box(vec3(4));
-      scene_node *node = new scene_node();
-      app_scene->add_child(node);
-      app_scene->add_mesh_instance(new mesh_instance(node, box, red));
+	  InitialiseSystems();
+
+
+	  octet::scene_node *node = new octet::scene_node();
     }
+
+	void InitialiseSystems()
+	{
+		LSystemInstance* A = new LSystemInstance("src/examples/LSystem/systems/A.txt");
+		systems.push_back(*A);
+
+	}
+
 
     /// this is called to draw the world
     void draw_world(int x, int y, int w, int h) {
@@ -37,11 +55,6 @@ namespace octet {
 
       // draw the scene
       app_scene->render((float)vx / vy);
-
-      // tumble the box  (there is only one mesh instance)
-      scene_node *node = app_scene->get_mesh_instance(0)->get_node();
-      node->rotate(1, vec3(1, 0, 0));
-      node->rotate(1, vec3(0, 1, 0));
     }
   };
 }

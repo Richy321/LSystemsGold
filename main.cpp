@@ -7,7 +7,7 @@
 // Text overlay
 //
 
-#define OCTET_BULLET 1
+//#define OCTET_BULLET 1
 
 #include "../../octet.h"
 
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   octet::app::init_all(argc, argv);
 
   // our application.
-  octet::LSystem app(argc, argv);
+  LSys::LSystem app(argc, argv);
   app.init();
 
   // open windows

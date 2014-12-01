@@ -1,0 +1,6 @@
+/*.opensdf
+/*.sdf
+/*.suo
+/*.filters
+/LSystem.xcodeproj/*.pbxproj
+/LSystem.xcodeproj/project.xcworkspace/*.xcworkspacedata
