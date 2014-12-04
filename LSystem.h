@@ -18,7 +18,12 @@ namespace LSys
     // scene for drawing box
     octet::ref<octet::visual_scene> app_scene;
 	octet::dynarray<LSystemInstance> systems;
+
+	int currentSystemIndex = 0;
 	
+	IRenderer *renderer = nullptr;
+
+
   public:
     /// this is called when we construct the class before everything is initialised.
     LSystem(int argc, char **argv) : app(argc, argv) {
@@ -32,26 +37,27 @@ namespace LSys
 
 	  InitialiseSystems();
 
-
-	  octet::scene_node *node = new octet::scene_node();
+	  renderer = new LineRenderer();
     }
 
 	void InitialiseSystems()
 	{
 		LSystemInstance* A = new LSystemInstance("src/examples/LSystem/systems/A.txt");
 		systems.push_back(*A);
-
 	}
 
 
     /// this is called to draw the world
-    void draw_world(int x, int y, int w, int h) {
+    void draw_world(int x, int y, int w, int h) 
+	{
       int vx = 0, vy = 0;
       get_viewport_size(vx, vy);
       app_scene->begin_render(vx, vy);
 
       // update matrices. assume 30 fps.
       app_scene->update(1.0f/30);
+
+	  renderer->Render(systems[currentSystemIndex]);
 
       // draw the scene
       app_scene->render((float)vx / vy);

@@ -1,6 +1,5 @@
 #pragma once
 #include "LSystemInstance.h"
-
 namespace LSys
 {
 	class IRenderer

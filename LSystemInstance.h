@@ -18,21 +18,41 @@ namespace LSys
 	class LSystemInstance
 	{
 	private:
-		void ApplyRule(const Rule &rule)
-		{
 
-
-		}
 	public:
+
+		class LSystemState
+		{
+			int iterationNumber;
+			char *result;
+
+		public:
+
+			LSystemState(int iterationNumber, char *res)
+			{
+				this->iterationNumber = iterationNumber;
+				size_t size = strlen(res) + 1;
+				result = new char[size];
+				strcpy(result, res);
+				result[size - 1] = NULL;
+			}
+
+			~LSystemState()
+			{
+				delete[] result;
+			}
+		};
 
 		LSystemInstance() = default;
 		LSystemInstance(const char * filePath)
 		{
 			this->filePath = filePath;
 			Load(filePath);
-
 		}
-		~LSystemInstance() {}
+		~LSystemInstance() 
+		{
+			delete axiom;
+		}
 
 		int iterations;
 		float angle;
@@ -41,10 +61,13 @@ namespace LSys
 		char* axiom;
 		const char* filePath;
 
+		//octet::dictionary<char*, char*>
 
-		
 		octet::dynarray<Rule*> rules;
 		octet::dynarray<char> currentSystem;
+		octet::dynarray<LSystemState*> states;
+
+		int currentStateIndex = 0;
 
 		void Load(const char* filename)
 		{
@@ -126,8 +149,9 @@ namespace LSys
 							}
 							size_t size = valuePtr - tmpValueBuffer +1;
 
-							axiom = (char*)malloc(size);
-							memcpy(axiom, tmpValueBuffer, size);
+							axiom = new char[size];
+							strcpy(axiom, tmpValueBuffer);
+							//memcpy(axiom, tmpValueBuffer, size);
 						}
 					}
 
@@ -148,16 +172,50 @@ namespace LSys
 								valuePtr++;
 								inst++;
 							}
-							size_t size = valuePtr - tmpValueBuffer + 1;
-							char* rule = (char*)malloc(size);
+							size_t size = valuePtr - tmpValueBuffer + 1; //null terminator
+							char* rule = new char[size];
 							memcpy(rule, tmpValueBuffer, size);
 
 							Rule *newRule = new Rule(rule);
 							rules.push_back(newRule);
+
+							delete[] rule;
 						}
 					}
 				}
 			}
 		}
+
+		void Run()
+		{
+			octet::dynarray<char> result;
+
+			for (int i = 0; i < strlen(axiom); i++)
+			{
+				result.push_back(axiom[i]);
+			}
+
+			for (int i = 0; i < iterations; i++)
+			{
+				//loop through each char
+				//apply rules
+
+				for (unsigned int j = 0; j < result.size(); j++)
+				{
+					//check if 
+
+
+					for each(Rule *rule in rules)
+					{
+
+						//curItResult
+					}
+				}
+
+				//LSystemState *state = new LSystemState(i, result);
+			}
+		}
+
+		LSystemState* GetCurrentState() { return states[currentStateIndex]; }
 	};
 }
