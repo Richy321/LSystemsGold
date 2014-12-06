@@ -2,8 +2,6 @@
 #include "../../octet.h"
 #include "Rule.h"
 
-#define SIZEOF_ARRAY( a ) (sizeof( a ) / sizeof( a[ 0 ] )) 
-
 namespace
 {
 	static const char *angleKeyword = "angle";
@@ -13,28 +11,32 @@ namespace
 	static const char valueDelimiter = ':';
 }
 
+#define SIZEOF_ARRAY( a ) (sizeof( a ) / sizeof( a[ 0 ] )) 
+
 namespace LSys
 {
 	class LSystemInstance
 	{
 	private:
-
+		octet::dictionary<const char*, const char*> ruleMap;
 	public:
-
 		class LSystemState
 		{
+		private:
 			int iterationNumber;
 			char *result;
-
+			
 		public:
 
-			LSystemState(int iterationNumber, char *res)
+			LSystemState(int iterationNumber, const char *res)
 			{
 				this->iterationNumber = iterationNumber;
 				size_t size = strlen(res) + 1;
 				result = new char[size];
-				strcpy(result, res);
+				strcpy_s(result, sizeof(res), res);
 				result[size - 1] = NULL;
+
+
 			}
 
 			~LSystemState()
@@ -46,7 +48,7 @@ namespace LSys
 		LSystemInstance() = default;
 		LSystemInstance(const char * filePath)
 		{
-			this->filePath = filePath;
+			this->filePath = filePath; 
 			Load(filePath);
 		}
 		~LSystemInstance() 
@@ -60,8 +62,6 @@ namespace LSys
 
 		char* axiom;
 		const char* filePath;
-
-		//octet::dictionary<char*, char*>
 
 		octet::dynarray<Rule*> rules;
 		octet::dynarray<char> currentSystem;
@@ -176,9 +176,8 @@ namespace LSys
 							char* rule = new char[size];
 							memcpy(rule, tmpValueBuffer, size);
 
-							Rule *newRule = new Rule(rule);
-							rules.push_back(newRule);
-
+							//ruleMap
+							AddRuleToDictionary(rule);
 							delete[] rule;
 						}
 					}
@@ -186,36 +185,92 @@ namespace LSys
 			}
 		}
 
+		void AddRuleToDictionary(char * rawRule)
+		{
+			const char* compare;
+			const char* replace;
+
+			size_t size = strlen(rawRule) + 1; //null terminator
+			bool afterEquals = false;
+
+			compare = new char[100];
+			replace = new char[1000];
+
+			std::string tmp;
+
+			for (int i = 0; i < size; i++)
+			{
+				if (rawRule[i] == equalsSymbol)
+				{
+					compare = tmp.c_str();
+					tmp.clear();
+					afterEquals = true;
+				}
+				else
+				{
+					tmp.push_back(rawRule[i]);
+				}
+			}
+			replace = tmp.substr;
+
+			//add to map
+			ruleMap[compare] = replace;
+		}
+
 		void Run()
 		{
-			octet::dynarray<char> result;
-
-			for (int i = 0; i < strlen(axiom); i++)
-			{
-				result.push_back(axiom[i]);
-			}
+			size_t axiomSize = strlen(axiom);
+			
+			size_t resultSize = axiomSize;
+			char* result = new char[resultSize];
+			char* resultPtr = result;
 
 			for (int i = 0; i < iterations; i++)
 			{
 				//loop through each char
-				//apply rules
-
-				for (unsigned int j = 0; j < result.size(); j++)
+				for (unsigned int j = 0; j < axiomSize; j++)
 				{
-					//check if 
-
-
-					for each(Rule *rule in rules)
+					if (ruleMap.contains(&axiom[j]))
 					{
+						const char* replace = ruleMap[&axiom[j]];
 
-						//curItResult
+						if (SIZEOF_ARRAY(result) < strlen(result) + strlen(replace) +1) //+1 for null term
+						{
+							Grow(result);
+						}
+
+						strcpy_s(resultPtr, sizeof(replace), replace);
+						resultPtr += SIZEOF_ARRAY(replace);
 					}
 				}
 
-				//LSystemState *state = new LSystemState(i, result);
+				
+
+				LSystemState *state = new LSystemState(i, result);
+				states.push_back(state);
+
+
+
+				Resize(axiom, strlen(result)+1);
+				strcpy(axiom, result);
 			}
 		}
 
 		LSystemState* GetCurrentState() { return states[currentStateIndex]; }
 	};
+
+
+	//Grow char array with doubling
+	void Grow(char *arr)
+	{
+		Resize(arr, SIZEOF_ARRAY(arr) * 2);
+	}
+
+	void Resize(char * arr, int size)
+	{
+		char *newResult = new char[size];
+		memcpy(newResult, arr, sizeof(arr));
+		delete[] arr;
+		arr = newResult;
+	}
 }

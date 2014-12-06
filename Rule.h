@@ -53,6 +53,13 @@ namespace LSys
 		{
 			delete[] ruleString;
 		}
+
+
+		void ApplyRule(char * result, const char * axiom, const int axiomIndex)
+		{
+
+
+		}
 	};
 }
 
