@@ -16,7 +16,7 @@ namespace LSys
 	{
 		// scene for drawing box
 		octet::ref<octet::visual_scene> app_scene;
-		octet::dynarray<LSystemInstance> systems;
+		octet::dynarray<LSystemInstance*> systems;
 
 		int currentSystemIndex = 0;
 
@@ -24,7 +24,7 @@ namespace LSys
 
 	public:
 		/// this is called when we construct the class before everything is initialised.
-		LSystem(int argc, char **argv) : app(argc, argv) 
+		LSystem(int argc, char **argv) : app(argc, argv)
 		{
 		}
 
@@ -37,19 +37,16 @@ namespace LSys
 			InitialiseSystems();
 
 			renderer = new LineRenderer();
-			renderer->Initialise(app_scene, systems[currentSystemIndex].GetCurrentState());
+			renderer->Initialise(app_scene, systems[currentSystemIndex]);
 
 		}
 
 		void InitialiseSystems()
 		{
 			LSystemInstance* A = new LSystemInstance("src/examples/LSystem/systems/A.txt");
-			systems.push_back(*A);
+			systems.push_back(A);
 
 			A->Run();
-
-
-
 		}
 
 
@@ -76,22 +73,22 @@ namespace LSys
 
 				if (is_key_going_up(num))
 				{
-					currentSystemIndex = i-1;
-					renderer->Rebuild(systems[currentSystemIndex].GetCurrentState());
+					currentSystemIndex = i - 1;
+					renderer->Rebuild(systems[currentSystemIndex]);
 				}
 			}
 
 			if (is_key_going_up('+'))
 			{
-				if (systems[currentSystemIndex].currentStateIndex < systems[currentSystemIndex].iterations - 2)
-					systems[currentSystemIndex].currentStateIndex++;
+				if (systems[currentSystemIndex]->currentStateIndex < systems[currentSystemIndex]->iterations - 2)
+					systems[currentSystemIndex]->currentStateIndex++;
 			}
 
 			if (is_key_going_up('-'))
 			{
-				if (systems[currentSystemIndex].currentStateIndex > 0)
-					systems[currentSystemIndex].currentStateIndex--;
+				if (systems[currentSystemIndex]->currentStateIndex > 0)
+					systems[currentSystemIndex]->currentStateIndex--;
 			}
 		}
-  };
+	};
 }

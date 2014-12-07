@@ -84,8 +84,11 @@ namespace LSys
 
 		void Resize(char * arr, int size)
 		{
+			//char *newResult = (char*)malloc(sizeof(char) * size);
 			char *newResult = new char[size];
+			memset(newResult, 0, sizeof(newResult));
 			strcpy(newResult, arr);
+			//delete[] arr;
 			arr = newResult;
 		}
 
@@ -250,7 +253,9 @@ namespace LSys
 			for (int i = 0; i < iterations; i++)
 			{
 				axiomSize = strlen(axiom);
-				result = new char[axiomSize];
+				
+				result = new char[axiomSize + 1];
+				//result = (char*)malloc(sizeof(char) * axiomSize +1);
 				memset(result, 0, sizeof(result));
 
 				//loop through each char
@@ -271,14 +276,13 @@ namespace LSys
 					{
 						const char* replace = matchingRule->second;
 						size_t replaceLength = strlen(replace);
-
 						size_t combinedSize = strlen(result) + replaceLength + 1; //+1 for null term
 
-						if (SIZEOF_ARRAY(result) < combinedSize) 
-						{
+						//if(sizeof(result) < combinedSize) 
+						//{
 							Resize(result, (int)combinedSize);
 							//Grow(result);
-						}
+						//}
 						strcat(result, replace);
 					}
 					else
@@ -292,9 +296,13 @@ namespace LSys
 
 				Resize(axiom, (int)strlen(result)+1);
 				strcpy(axiom, result);
+				//free(result);
+				//delete[] result;
 			}
 		}
 
 		const LSystemState* GetCurrentState() const { return states[currentStateIndex]; }
+		
+		float GetAngle() const { return angle; }
 	};
 }

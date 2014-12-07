@@ -33,6 +33,9 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{22786083-47af-48b2-98c4-2963f667bc44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="BinaryTree">
+      <UniqueIdentifier>{7cf53f43-07e1-44dc-acab-6e2be6683ae4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -431,6 +434,12 @@
     <ClInclude Include="IRenderer.h" />
     <ClInclude Include="LSystemInstance.h" />
     <ClInclude Include="LineRenderer.h" />
+    <ClInclude Include="Tree.h">
+      <Filter>BinaryTree</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>BinaryTree</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resources\mesh_builder.inl">
