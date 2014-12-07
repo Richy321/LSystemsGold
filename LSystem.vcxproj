@@ -219,7 +219,6 @@
     <ClInclude Include="LineRenderer.h" />
     <ClInclude Include="LSystem.h" />
     <ClInclude Include="LSystemInstance.h" />
-    <ClInclude Include="Rule.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\resources\mesh_builder.inl" />

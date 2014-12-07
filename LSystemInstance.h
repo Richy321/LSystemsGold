@@ -1,6 +1,5 @@
 #pragma once
 #include "../../octet.h"
-#include "Rule.h"
 
 namespace
 {
@@ -9,6 +8,7 @@ namespace
 	static const char *ruleKeyword = "rule";
 	static const char *iterationsKeyword = "iterations";
 	static const char valueDelimiter = ':';
+	static const char equalsSymbol = '=';
 }
 
 #define SIZEOF_ARRAY( a ) (sizeof( a ) / sizeof( a[ 0 ] )) 
@@ -18,7 +18,14 @@ namespace LSys
 	class LSystemInstance
 	{
 	private:
-		octet::dictionary<const char*, const char*> ruleMap;
+		struct cmp_str
+		{
+			bool operator()(char const *a, char const *b)
+			{
+				return strcmp(a, b) < 0;
+			}
+		};
+		std::map<const char*, const char *, cmp_str>ruleMap;
 	public:
 		class LSystemState
 		{
@@ -33,18 +40,19 @@ namespace LSys
 				this->iterationNumber = iterationNumber;
 				size_t size = strlen(res) + 1;
 				result = new char[size];
-				strcpy_s(result, sizeof(res), res);
-				result[size - 1] = NULL;
-
-
+				memset(result, 0, sizeof(result));
+				strcpy(result, res);
 			}
 
 			~LSystemState()
 			{
 				delete[] result;
 			}
-		};
 
+			const int getIterationNumber() const { return iterationNumber; }
+			const char* getResult() const  { return result; }
+		};
+	
 		LSystemInstance() = default;
 		LSystemInstance(const char * filePath)
 		{
@@ -63,11 +71,23 @@ namespace LSys
 		char* axiom;
 		const char* filePath;
 
-		octet::dynarray<Rule*> rules;
 		octet::dynarray<char> currentSystem;
 		octet::dynarray<LSystemState*> states;
 
 		int currentStateIndex = 0;
+
+		//Grow char array with doubling
+		void Grow(char *arr)
+		{
+			Resize(arr, SIZEOF_ARRAY(arr) * 2);
+		}
+
+		void Resize(char * arr, int size)
+		{
+			char *newResult = new char[size];
+			strcpy(newResult, arr);
+			arr = newResult;
+		}
 
 		void Load(const char* filename)
 		{
@@ -187,31 +207,35 @@ namespace LSys
 
 		void AddRuleToDictionary(char * rawRule)
 		{
-			const char* compare;
-			const char* replace;
+			char* compare;
+			char* replace;
 
-			size_t size = strlen(rawRule) + 1; //null terminator
+			size_t size = strlen(rawRule); //null terminator
 			bool afterEquals = false;
 
 			compare = new char[100];
+			memset(compare, 0, sizeof(compare));
 			replace = new char[1000];
-
-			std::string tmp;
+			memset(replace, 0, sizeof(replace));
 
 			for (int i = 0; i < size; i++)
 			{
 				if (rawRule[i] == equalsSymbol)
 				{
-					compare = tmp.c_str();
-					tmp.clear();
 					afterEquals = true;
 				}
 				else
 				{
-					tmp.push_back(rawRule[i]);
+					if (!afterEquals)
+					{
+						strncat(compare, &rawRule[i], 1);
+					}
+					else
+					{
+						strncat(replace, &rawRule[i], 1);
+					}
 				}
 			}
-			replace = tmp.substr;
 
 			//add to map
 			ruleMap[compare] = replace;
@@ -219,58 +243,58 @@ namespace LSys
 
 		void Run()
 		{
-			size_t axiomSize = strlen(axiom);
-			
-			size_t resultSize = axiomSize;
-			char* result = new char[resultSize];
-			char* resultPtr = result;
+			size_t axiomSize;
+			char* result;			
+			//char* resultPtr = result;
 
 			for (int i = 0; i < iterations; i++)
 			{
+				axiomSize = strlen(axiom);
+				result = new char[axiomSize];
+				memset(result, 0, sizeof(result));
+
 				//loop through each char
 				for (unsigned int j = 0; j < axiomSize; j++)
 				{
-					if (ruleMap.contains(&axiom[j]))
+					//grab current letter with null term
+					char * letter = new char[2];
+					letter[0] = axiom[j]; 
+					letter[1] = '\0';
+
+					//Context sensitive = Get max length of rule keys
+						//loop backwards from j+MaxLength to j
+							//find axoim[j] to axiom[j+ctr] in rules, then replace (i.e. longest takes priority?)
+								//if found, increment j by ctr to skip over replaced letters.
+
+					auto matchingRule = ruleMap.find(letter);
+					if (matchingRule != ruleMap.end())
 					{
-						const char* replace = ruleMap[&axiom[j]];
+						const char* replace = matchingRule->second;
+						size_t replaceLength = strlen(replace);
 
-						if (SIZEOF_ARRAY(result) < strlen(result) + strlen(replace) +1) //+1 for null term
+						size_t combinedSize = strlen(result) + replaceLength + 1; //+1 for null term
+
+						if (SIZEOF_ARRAY(result) < combinedSize) 
 						{
-							Grow(result);
+							Resize(result, (int)combinedSize);
+							//Grow(result);
 						}
-
-						strcpy_s(resultPtr, sizeof(replace), replace);
-						resultPtr += SIZEOF_ARRAY(replace);
+						strcat(result, replace);
+					}
+					else
+					{
+						strncat(result, &axiom[j], 1);
 					}
 				}
-
-				
 
 				LSystemState *state = new LSystemState(i, result);
 				states.push_back(state);
 
-
-
-				Resize(axiom, strlen(result)+1);
+				Resize(axiom, (int)strlen(result)+1);
 				strcpy(axiom, result);
 			}
 		}
 
-		LSystemState* GetCurrentState() { return states[currentStateIndex]; }
+		const LSystemState* GetCurrentState() const { return states[currentStateIndex]; }
 	};
-
-
-	//Grow char array with doubling
-	void Grow(char *arr)
-	{
-		Resize(arr, SIZEOF_ARRAY(arr) * 2);
-	}
-
-	void Resize(char * arr, int size)
-	{
-		char *newResult = new char[size];
-		memcpy(newResult, arr, sizeof(arr));
-		delete[] arr;
-		arr = newResult;
-	}
 }

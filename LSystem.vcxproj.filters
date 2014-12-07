@@ -430,7 +430,6 @@
     <ClInclude Include="LSystem.h" />
     <ClInclude Include="IRenderer.h" />
     <ClInclude Include="LSystemInstance.h" />
-    <ClInclude Include="Rule.h" />
     <ClInclude Include="LineRenderer.h" />
   </ItemGroup>
   <ItemGroup>

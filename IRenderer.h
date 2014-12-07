@@ -5,6 +5,7 @@ namespace LSys
 	class IRenderer
 	{
 	public:
-		virtual void Render(LSystemInstance &system) = 0;
+		virtual void Initialise(octet::visual_scene *app_scene, const LSystemInstance::LSystemState *state) = 0;
+		virtual void Rebuild(const LSystemInstance::LSystemState *state) = 0;
 	};
 }
