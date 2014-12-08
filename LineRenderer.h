@@ -22,16 +22,13 @@ namespace LSys
 
 	public:
 
-		octet::scene_node *node;
-		octet::material *green;
-		octet::mesh *mesh;
+		octet::ref<octet::scene_node>node;
+		octet::ref<octet::material> green;
+		octet::ref<octet::mesh>mesh;
 
 		std::map<char, RenderActionType> SymbolActionMap;
 		LineRenderer()
 		{
-			green = new octet::material();
-			mesh = new octet::mesh();
-			node = new octet::scene_node();
 		}
 
 		~LineRenderer()
@@ -43,15 +40,7 @@ namespace LSys
 			node = new octet::scene_node();
 			octet::param_shader *shader = new octet::param_shader("shaders/default.vs", "shaders/simple_color.fs");
 			green = new octet::material(octet::vec4(0, 1, 0, 1), shader);
-			mesh = new octet::mesh();
-			mesh->set_mode(GL_LINES);
 			Rebuild(system);
-
-			size_t num_vertices = 1000;
-			size_t num_indices = num_vertices * 2;
-
-			mesh->allocate(sizeof(my_vertex) * num_vertices, sizeof(uint32_t) * num_indices);
-			mesh->set_params(sizeof(my_vertex), num_indices, num_vertices, GL_LINES, GL_UNSIGNED_INT);
 		
 			// describe the structure of my_vertex to OpenGL
 			mesh->add_attribute(octet::attribute_pos, 3, GL_FLOAT, 0);
@@ -65,10 +54,18 @@ namespace LSys
 		{
 			const LSystemInstance::LSystemState *state = system->GetCurrentState();
 
+			mesh = new octet::mesh();
+			size_t num_vertices = 1000;
+			size_t num_indices = num_vertices * 2;
+
+			mesh->allocate(sizeof(my_vertex) * num_vertices, sizeof(uint32_t) * num_indices);
+			mesh->set_params(sizeof(my_vertex), num_indices, num_vertices, GL_LINES, GL_UNSIGNED_INT);
+
+
 			std::stack<Node*> *renderNodeStack = new std::stack<Node*>();
 
 			octet::mat4t forward;
-			forward.translate(0.0f, 1.0f, 0.0f);
+			forward.translate(0.0f, 10.0f, 0.0f);
 
 			octet::mat4t turnAntiClockwise;
 			turnAntiClockwise.rotateY(system->GetAngle());

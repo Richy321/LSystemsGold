@@ -88,7 +88,7 @@ namespace LSys
 			char *newResult = new char[size];
 			memset(newResult, 0, sizeof(newResult));
 			strcpy(newResult, arr);
-			//delete[] arr;
+			delete [] arr;
 			arr = newResult;
 		}
 
@@ -246,24 +246,34 @@ namespace LSys
 
 		void Run()
 		{
-			size_t axiomSize;
-			char* result;			
+			//size_t axiomSize;
+			//char* result;
+			octet::dynarray<char> curAxiom;
+			octet::dynarray<char> result;
+
+			for (int i = 0; i < strlen(axiom); i++)
+			{
+				curAxiom.push_back(axiom[i]);
+			}
+
+
 			//char* resultPtr = result;
 
 			for (int i = 0; i < iterations; i++)
 			{
-				axiomSize = strlen(axiom);
+				//axiomSize = strlen(axiom);
 				
-				result = new char[axiomSize + 1];
+				//result = new char[axiomSize + 1];
 				//result = (char*)malloc(sizeof(char) * axiomSize +1);
-				memset(result, 0, sizeof(result));
+				//memset(result, 0, sizeof(result));
+				result.reset();
 
 				//loop through each char
-				for (unsigned int j = 0; j < axiomSize; j++)
+				for (unsigned int j = 0; j < curAxiom.size(); j++)
 				{
 					//grab current letter with null term
 					char * letter = new char[2];
-					letter[0] = axiom[j]; 
+					letter[0] = curAxiom[j];
 					letter[1] = '\0';
 
 					//Context sensitive = Get max length of rule keys
@@ -276,28 +286,59 @@ namespace LSys
 					{
 						const char* replace = matchingRule->second;
 						size_t replaceLength = strlen(replace);
-						size_t combinedSize = strlen(result) + replaceLength + 1; //+1 for null term
+						//size_t combinedSize = strlen(result) + replaceLength + 1; //+1 for null term
 
 						//if(sizeof(result) < combinedSize) 
 						//{
-							Resize(result, (int)combinedSize);
-							//Grow(result);
+							//Resize(result, (int)combinedSize);
+							
+						//char *newResult = new char[combinedSize];
+						//memset(newResult, 0, sizeof(newResult));
+						//strcpy(newResult, result);
+						//memcpy(newResult, result, sizeof(result));
+						//delete[] result;
+						//result = newResult;
+						
+						//Grow(result);
 						//}
-						strcat(result, replace);
+						for (int k = 0; k < strlen(replace); k++)
+						{
+							result.push_back(replace[k]);
+						}
+						//strcat(result, replace);
 					}
 					else
 					{
-						strncat(result, &axiom[j], 1);
+						result.push_back(curAxiom[j]);
+						//strncat(result, &axiom[j], 1);
 					}
+
+					delete[] letter;
 				}
 
-				LSystemState *state = new LSystemState(i, result);
+				char *c_result = new char[result.size() + 1];
+				for (int i = 0; i < result.size(); i++)
+				{
+					c_result[i] = result[i];
+				}
+				c_result[result.size()] = '\0';
+
+				LSystemState *state = new LSystemState(i, c_result);
 				states.push_back(state);
 
-				Resize(axiom, (int)strlen(result)+1);
-				strcpy(axiom, result);
+				delete[] c_result;
+
+				//Resize(axiom, (int)strlen(result)+1);
+				//strcpy(axiom, result);
 				//free(result);
 				//delete[] result;
+				curAxiom.reset();
+				for (int i = 0; i < result.size(); i++)
+				{
+					curAxiom.push_back(result[i]);
+				}
+				//curAxiom = result;
+				
 			}
 		}
 
