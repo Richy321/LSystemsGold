@@ -32,7 +32,6 @@ namespace LSys
 		private:
 			int iterationNumber;
 			char *result;
-			
 		public:
 
 			LSystemState(int iterationNumber, const char *res)
@@ -84,7 +83,6 @@ namespace LSys
 
 		void Resize(char * arr, int size)
 		{
-			//char *newResult = (char*)malloc(sizeof(char) * size);
 			char *newResult = new char[size];
 			memset(newResult, 0, sizeof(newResult));
 			strcpy(newResult, arr);
@@ -246,8 +244,6 @@ namespace LSys
 
 		void Run()
 		{
-			//size_t axiomSize;
-			//char* result;
 			octet::dynarray<char> curAxiom;
 			octet::dynarray<char> result;
 
@@ -256,16 +252,8 @@ namespace LSys
 				curAxiom.push_back(axiom[i]);
 			}
 
-
-			//char* resultPtr = result;
-
 			for (int i = 0; i < iterations; i++)
 			{
-				//axiomSize = strlen(axiom);
-				
-				//result = new char[axiomSize + 1];
-				//result = (char*)malloc(sizeof(char) * axiomSize +1);
-				//memset(result, 0, sizeof(result));
 				result.reset();
 
 				//loop through each char
@@ -285,41 +273,23 @@ namespace LSys
 					if (matchingRule != ruleMap.end())
 					{
 						const char* replace = matchingRule->second;
-						size_t replaceLength = strlen(replace);
-						//size_t combinedSize = strlen(result) + replaceLength + 1; //+1 for null term
-
-						//if(sizeof(result) < combinedSize) 
-						//{
-							//Resize(result, (int)combinedSize);
-							
-						//char *newResult = new char[combinedSize];
-						//memset(newResult, 0, sizeof(newResult));
-						//strcpy(newResult, result);
-						//memcpy(newResult, result, sizeof(result));
-						//delete[] result;
-						//result = newResult;
-						
-						//Grow(result);
-						//}
 						for (int k = 0; k < strlen(replace); k++)
 						{
 							result.push_back(replace[k]);
 						}
-						//strcat(result, replace);
 					}
 					else
 					{
 						result.push_back(curAxiom[j]);
-						//strncat(result, &axiom[j], 1);
 					}
 
 					delete[] letter;
 				}
 
 				char *c_result = new char[result.size() + 1];
-				for (int i = 0; i < result.size(); i++)
+				for (unsigned int k = 0; k < result.size(); k++)
 				{
-					c_result[i] = result[i];
+					c_result[k] = result[k];
 				}
 				c_result[result.size()] = '\0';
 
@@ -328,17 +298,11 @@ namespace LSys
 
 				delete[] c_result;
 
-				//Resize(axiom, (int)strlen(result)+1);
-				//strcpy(axiom, result);
-				//free(result);
-				//delete[] result;
 				curAxiom.reset();
-				for (int i = 0; i < result.size(); i++)
+				for (unsigned int k = 0; k < result.size(); k++)
 				{
-					curAxiom.push_back(result[i]);
+					curAxiom.push_back(result[k]);
 				}
-				//curAxiom = result;
-				
 			}
 		}
 

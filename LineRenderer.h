@@ -26,6 +26,8 @@ namespace LSys
 		octet::ref<octet::material> green;
 		octet::ref<octet::mesh>mesh;
 
+		const float translateAmount = 0.1f;
+
 		std::map<char, RenderActionType> SymbolActionMap;
 		LineRenderer()
 		{
@@ -38,14 +40,10 @@ namespace LSys
 		void Initialise(octet::visual_scene *app_scene, const LSystemInstance *system)
 		{
 			node = new octet::scene_node();
-			octet::param_shader *shader = new octet::param_shader("shaders/default.vs", "shaders/simple_color.fs");
+			octet::param_shader *shader = NULL;//new octet::param_shader("shaders/default.vs", "shaders/simple_color.fs");
 			green = new octet::material(octet::vec4(0, 1, 0, 1), shader);
 			Rebuild(system);
 		
-			// describe the structure of my_vertex to OpenGL
-			mesh->add_attribute(octet::attribute_pos, 3, GL_FLOAT, 0);
-			mesh->add_attribute(octet::attribute_color, 4, GL_UNSIGNED_BYTE, 12, GL_TRUE);
-
 			app_scene->add_child(node);
 			app_scene->add_mesh_instance(new octet::mesh_instance(node, mesh, green));
 		}
@@ -55,75 +53,58 @@ namespace LSys
 			const LSystemInstance::LSystemState *state = system->GetCurrentState();
 
 			mesh = new octet::mesh();
-			size_t num_vertices = 1000;
+
+			size_t num_vertices = 100000;
 			size_t num_indices = num_vertices * 2;
 
-			mesh->allocate(sizeof(my_vertex) * num_vertices, sizeof(uint32_t) * num_indices);
-			mesh->set_params(sizeof(my_vertex), num_indices, num_vertices, GL_LINES, GL_UNSIGNED_INT);
+			mesh->allocate(sizeof(my_vertex) * num_vertices, 0);
+			mesh->set_params(sizeof(my_vertex), 0, num_vertices, GL_LINES, NULL);
 
-
-			std::stack<Node*> *renderNodeStack = new std::stack<Node*>();
-
-			octet::mat4t forward;
-			forward.translate(0.0f, 10.0f, 0.0f);
-
-			octet::mat4t turnAntiClockwise;
-			turnAntiClockwise.rotateY(system->GetAngle());
-
-			octet::mat4t turnClockwise;
-			turnClockwise.rotateY(-system->GetAngle());
-
-			const char *result = state->getResult();
-			octet::mat4t curMatrix;
-
+			mesh->add_attribute(octet::attribute_pos, 3, GL_FLOAT, 0);
+			mesh->add_attribute(octet::attribute_color, 4, GL_UNSIGNED_BYTE, 12, GL_TRUE);
+			
 			octet::gl_resource::wolock vl(mesh->get_vertices());
 			my_vertex *vtx = (my_vertex *)vl.u8();
 
-			octet::gl_resource::wolock il(mesh->get_indices());
-			uint32_t *idx = il.u32();
+			std::stack<octet::mat4t> *renderNodeStack = new std::stack<octet::mat4t>();
+			octet::mat4t identMat;
+			renderNodeStack->push(identMat);
 
-			//initial point
-			vtx->pos = octet::vec3p(0.0f, 0.0f, 0.0f);
-			vtx->color = make_color(0.0f, 1.0f, 0.0f);
-			idx[0] = 0;
-			idx[1] = 1;
-			idx += 2;
+			const char *result = state->getResult();
+
+			printf("result:%s", result);
+
+			octet::mat4t matrix;
 
 			for (int i = 0; i < strlen(result); i++)
 			{
 				if (result[i] == GetDrawLineSymbol())
 				{
-					curMatrix = curMatrix * forward;
-					AddPoint(vtx, idx, curMatrix);
+					vtx->pos = renderNodeStack->top()[3].xyz();
+					vtx++;
+
+					renderNodeStack->top().translate(octet::vec3(0.0f, translateAmount, 0.0f));
+					vtx->pos = renderNodeStack->top()[3].xyz();
+					vtx++;
 				}
 				else if (result[i] == GetTurnClockwiseSymbol())
 				{
-					curMatrix = curMatrix * turnClockwise;
+					renderNodeStack->top().rotateZ(-system->GetAngle());
 				}
 				else if (result[i] == GetTurnAntiClockwiseSymbol())
 				{
-					curMatrix = curMatrix * turnAntiClockwise;
+					renderNodeStack->top().rotateZ(system->GetAngle());
 				}
 				else if (result[i] == GetStackPushSymbol())
 				{
-					Node* newNode = new Node(curMatrix);
-					renderNodeStack->push(newNode);
+					matrix = renderNodeStack->top();
+					renderNodeStack->push(matrix);
 				}
 				else if (result[i] == GetStackPopSymbol())
 				{
 					renderNodeStack->pop();
 				}
 			}
-		}
-
-		void AddPoint(my_vertex *vtx, uint32_t *idx, octet::mat4t curMatrix)
-		{
-			octet::vec3p prevPos = vtx[-1].pos;
-			vtx->pos = prevPos * curMatrix;
-			vtx->color = make_color(0.0f, 1.0f, 0.0f);
-			idx[0] = idx[-1] + 1;
-			idx[1] = idx[-1] + 2;
-			idx += 2;
 		}
 
 		static uint32_t make_color(float r, float g, float b) {

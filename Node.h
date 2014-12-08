@@ -9,6 +9,7 @@ namespace LSys
 	public:
 
 		octet::mat4t matrix;
+		int vertexIndex;
 		Node(octet::mat4t mat)
 		{
 			matrix = mat;
@@ -16,6 +17,11 @@ namespace LSys
 
 		~Node()
 		{
+		}
+
+		octet::vec3 GetPos()
+		{
+			return matrix[3].xyz();
 		}
 	};
 }

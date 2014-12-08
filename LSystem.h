@@ -22,6 +22,10 @@ namespace LSys
 
 		IRenderer *renderer = nullptr;
 
+		bool isKeyDownLastFrame = false;
+
+		octet::camera_instance *camera;
+
 	public:
 		/// this is called when we construct the class before everything is initialised.
 		LSystem(int argc, char **argv) : app(argc, argv)
@@ -34,11 +38,12 @@ namespace LSys
 			app_scene = new octet::visual_scene();
 			app_scene->create_default_camera_and_lights();
 
+			camera = app_scene->get_camera_instance(0);
+
 			InitialiseSystems();
 
 			renderer = new LineRenderer();
 			renderer->Initialise(app_scene, systems[currentSystemIndex]);
-
 		}
 
 		void InitialiseSystems()
@@ -47,6 +52,7 @@ namespace LSys
 			systems.push_back(A);
 
 			A->Run();
+			A->currentStateIndex = A->iterations - 1;;
 		}
 
 
@@ -60,6 +66,8 @@ namespace LSys
 			// update matrices. assume 30 fps.
 			app_scene->update(1.0f / 30);
 
+			HandleInput();
+
 			// draw the scene
 			app_scene->render((float)vx / vy);
 		}
@@ -67,28 +75,63 @@ namespace LSys
 
 		void HandleInput()
 		{
+			bool keyDown = false;
 			for (int i = 1; i <= 8; i++)
 			{
 				char num = '0' + i;
 
-				if (is_key_going_up(num))
+				if (is_key_down(num))
 				{
-					currentSystemIndex = i - 1;
+					keyDown = true;
+					if (!isKeyDownLastFrame)
+					{
+						currentSystemIndex = i - 1;
+						renderer->Rebuild(systems[currentSystemIndex]);
+					}
+				}
+			}
+
+			if (is_key_down('>'))
+			{
+				keyDown = true;
+				if (!isKeyDownLastFrame && systems[currentSystemIndex]->currentStateIndex < systems[currentSystemIndex]->iterations - 2)
+				{
+					systems[currentSystemIndex]->currentStateIndex++;
 					renderer->Rebuild(systems[currentSystemIndex]);
 				}
 			}
 
-			if (is_key_going_up('+'))
+			if (is_key_down('<'))
 			{
-				if (systems[currentSystemIndex]->currentStateIndex < systems[currentSystemIndex]->iterations - 2)
-					systems[currentSystemIndex]->currentStateIndex++;
+				keyDown = true;
+
+				if (!isKeyDownLastFrame && systems[currentSystemIndex]->currentStateIndex > 0)
+				{
+					systems[currentSystemIndex]->currentStateIndex--;
+					renderer->Rebuild(systems[currentSystemIndex]);
+				}
 			}
 
-			if (is_key_going_up('-'))
+			float cameraVelocity = 1.0f;
+
+			if (is_key_down('W'))
 			{
-				if (systems[currentSystemIndex]->currentStateIndex > 0)
-					systems[currentSystemIndex]->currentStateIndex--;
+				camera->get_node()->translate(octet::vec3(0.0f, cameraVelocity, 0.0f));
 			}
+			if (is_key_down('S'))
+			{
+				camera->get_node()->translate(octet::vec3(0.0f, -cameraVelocity, 0.0f));
+			}
+			if (is_key_down('A'))
+			{
+				camera->get_node()->translate(octet::vec3(-cameraVelocity, 0.0f, 0.0f));
+			}
+			if (is_key_down('D'))
+			{
+				camera->get_node()->translate(octet::vec3(cameraVelocity, 0.0f, 0.0f));
+			}
+
+			isKeyDownLastFrame = keyDown;
 		}
 	};
 }
