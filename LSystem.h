@@ -19,11 +19,7 @@ namespace LSys
 		octet::dynarray<LSystemInstance*> systems;
 
 		int currentSystemIndex = 0;
-
 		IRenderer *renderer = nullptr;
-
-		bool isKeyDownLastFrame = false;
-
 		octet::camera_instance *camera;
 
 	public:
@@ -39,7 +35,7 @@ namespace LSys
 			app_scene->create_default_camera_and_lights();
 
 			camera = app_scene->get_camera_instance(0);
-
+			camera->get_node()->translate(octet::vec3(0.0f, 12.0f, 0.0f));
 			InitialiseSystems();
 
 			renderer = new LineRenderer();
@@ -108,6 +104,10 @@ namespace LSys
 
 			HandleInput();
 
+			// clear to black
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			// draw the scene
 			app_scene->render((float)vx / vy);
 		}
@@ -121,11 +121,8 @@ namespace LSys
 
 				if (is_key_going_down(num))
 				{
-					if (!isKeyDownLastFrame)
-					{
-						currentSystemIndex = i - 1;
-						renderer->Rebuild(systems[currentSystemIndex]);
-					}
+					currentSystemIndex = i - 1;
+					renderer->Rebuild(systems[currentSystemIndex]);
 				}
 			}
 
@@ -165,6 +162,14 @@ namespace LSys
 			if (is_key_down('D'))
 			{
 				camera->get_node()->translate(octet::vec3(cameraVelocity, 0.0f, 0.0f));
+			}
+			if (is_key_down('Q'))
+			{
+				camera->get_node()->translate(octet::vec3(0.0f, 0.0f, -cameraVelocity));
+			}
+			if (is_key_down('E'))
+			{
+				camera->get_node()->translate(octet::vec3(0.0f, 0.0f, cameraVelocity));
 			}
 		}
 	};

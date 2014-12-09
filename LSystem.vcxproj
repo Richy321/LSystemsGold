@@ -215,6 +215,7 @@
     <ClInclude Include="..\..\shaders\shader.h" />
     <ClInclude Include="..\..\shaders\shaders.h" />
     <ClInclude Include="..\..\shaders\texture_shader.h" />
+    <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="IRenderer.h" />
     <ClInclude Include="LineRenderer.h" />

@@ -17,7 +17,6 @@ namespace LSys
 		struct my_vertex 
 		{
 			octet::vec3p pos;
-			uint32_t color;
 		};
 
 	public:
@@ -25,8 +24,6 @@ namespace LSys
 		octet::ref<octet::scene_node>node;
 		octet::ref<octet::material> green;
 		octet::ref<octet::mesh>mesh;
-
-		const float translateAmount = 0.1f;
 
 		std::map<char, RenderActionType> SymbolActionMap;
 		LineRenderer()
@@ -73,7 +70,7 @@ namespace LSys
 
 			for (int i = 0; i < strlen(result); i++)
 			{
-				if (result[i] == GetDrawLineSymbol())
+				if (result[i] == GetDrawLineSymbol() || result[i] == GetDrawLineSymbol2())
 				{
 					my_vertex vert;
 
@@ -106,10 +103,6 @@ namespace LSys
 				}
 			}
 			mesh->set_vertices(verts);
-		}
-
-		static uint32_t make_color(float r, float g, float b) {
-			return 0xff000000 + ((int)(r*255.0f) << 0) + ((int)(g*255.0f) << 8) + ((int)(b*255.0f) << 16);
 		}
 
 	};

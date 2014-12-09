@@ -1,0 +1,5 @@
+iterations:14
+angle:90
+axiom:FX
+rule:X=X-YF
+rule:Y=FX+Y
