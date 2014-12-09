@@ -1,0 +1,4 @@
+iterations:5
+angle:20
+axiom:F
+rule:F=F[+F]F[-F][F]

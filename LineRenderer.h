@@ -42,6 +42,10 @@ namespace LSys
 			node = new octet::scene_node();
 			octet::param_shader *shader = NULL;//new octet::param_shader("shaders/default.vs", "shaders/simple_color.fs");
 			green = new octet::material(octet::vec4(0, 1, 0, 1), shader);
+			mesh = new octet::mesh();
+			mesh->set_params(sizeof(my_vertex), 0, 0, GL_LINES, NULL);
+			mesh->add_attribute(octet::attribute_pos, 3, GL_FLOAT, 0);
+			mesh->add_attribute(octet::attribute_color, 4, GL_UNSIGNED_BYTE, 12, GL_TRUE);
 			Rebuild(system);
 		
 			app_scene->add_child(node);
@@ -52,19 +56,10 @@ namespace LSys
 		{
 			const LSystemInstance::LSystemState *state = system->GetCurrentState();
 
-			mesh = new octet::mesh();
-
 			size_t num_vertices = 100000;
 			size_t num_indices = num_vertices * 2;
-
-			mesh->allocate(sizeof(my_vertex) * num_vertices, 0);
-			mesh->set_params(sizeof(my_vertex), 0, num_vertices, GL_LINES, NULL);
-
-			mesh->add_attribute(octet::attribute_pos, 3, GL_FLOAT, 0);
-			mesh->add_attribute(octet::attribute_color, 4, GL_UNSIGNED_BYTE, 12, GL_TRUE);
 			
-			octet::gl_resource::wolock vl(mesh->get_vertices());
-			my_vertex *vtx = (my_vertex *)vl.u8();
+			octet::dynarray<my_vertex> verts;
 
 			std::stack<octet::mat4t> *renderNodeStack = new std::stack<octet::mat4t>();
 			octet::mat4t identMat;
@@ -80,12 +75,17 @@ namespace LSys
 			{
 				if (result[i] == GetDrawLineSymbol())
 				{
-					vtx->pos = renderNodeStack->top()[3].xyz();
-					vtx++;
+					my_vertex vert;
+
+					vert.pos = renderNodeStack->top()[3].xyz();
+					verts.push_back(vert);
+
+					my_vertex vertTop;
 
 					renderNodeStack->top().translate(octet::vec3(0.0f, translateAmount, 0.0f));
-					vtx->pos = renderNodeStack->top()[3].xyz();
-					vtx++;
+					vertTop.pos = renderNodeStack->top()[3].xyz();
+					verts.push_back(vertTop);
+
 				}
 				else if (result[i] == GetTurnClockwiseSymbol())
 				{
@@ -105,6 +105,7 @@ namespace LSys
 					renderNodeStack->pop();
 				}
 			}
+			mesh->set_vertices(verts);
 		}
 
 		static uint32_t make_color(float r, float g, float b) {
