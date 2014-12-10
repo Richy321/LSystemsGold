@@ -17,7 +17,6 @@ namespace LSys
 		virtual void Initialise(octet::visual_scene *app_scene, const LSystemInstance *system) = 0;
 		virtual void Rebuild(const LSystemInstance *system) = 0;
 
-		const float translateAmount = 0.1f;
 		const char GetDrawLineSymbol() const { return 'F';}
 		const char GetDrawLineSymbol2() const { return 'G'; }
 		const char GetStackPushSymbol() const { return '['; }

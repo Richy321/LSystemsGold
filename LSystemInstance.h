@@ -65,7 +65,8 @@ namespace LSys
 
 		int iterations;
 		float angle;
-		float distance = 1.0f;
+		float distance = 0.1f;
+		octet::vec3 colour = octet::vec3(0.0f, 1.0f, 0.0f);
 
 		char* axiom;
 		const char* filePath;

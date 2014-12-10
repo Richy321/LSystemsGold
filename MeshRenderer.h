@@ -16,7 +16,6 @@ namespace LSys
 		octet::ref<octet::material> green;
 		octet::ref<octet::mesh>mesh;
 
-
 		MeshRenderer()
 		{
 		}
@@ -36,6 +35,5 @@ namespace LSys
 
 
 		}
-
 	};
 }

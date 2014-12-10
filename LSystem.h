@@ -9,6 +9,9 @@
 #include "LineRenderer.h"
 #include "LSystemInstance.h"
 
+#include <Shlwapi.h>
+#pragma comment(lib, "shlwapi.lib")
+
 namespace LSys 
 {
   /// Scene containing a box with octet.
@@ -21,6 +24,7 @@ namespace LSys
 		int currentSystemIndex = 0;
 		IRenderer *renderer = nullptr;
 		octet::camera_instance *camera;
+		octet::random* rnd;
 
 	public:
 		/// this is called when we construct the class before everything is initialised.
@@ -33,6 +37,9 @@ namespace LSys
 		{
 			app_scene = new octet::visual_scene();
 			app_scene->create_default_camera_and_lights();
+
+
+			rnd = new octet::random();
 
 			camera = app_scene->get_camera_instance(0);
 			camera->get_node()->translate(octet::vec3(0.0f, 12.0f, 0.0f));
@@ -47,7 +54,12 @@ namespace LSys
 			WIN32_FIND_DATA fdFile;
 			HANDLE hFind = NULL;
 
-			wchar_t path[2048];
+			//TCHAR dest[MAX_PATH];
+			//GetThisPath(dest, MAX_PATH);
+
+			//DWORD a = GetCurrentDirectory(MAX_PATH, curDir);
+
+			wchar_t path[MAX_PATH];
 			wsprintf(path, L"%s\\*.txt", dirPath);
 
 			octet::dynarray<char*> files;
@@ -66,8 +78,8 @@ namespace LSys
 
 					if (!(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 					{
-						char* file = new char[2048];
-						wcstombs(file, path, 2048);
+						char* file = new char[MAX_PATH];
+						wcstombs(file, path, MAX_PATH);
 						files.push_back(file);
 					}
 				}
@@ -76,6 +88,16 @@ namespace LSys
 
 			return files;
 		}
+
+		TCHAR* GetThisPath(TCHAR* dest, size_t destSize)
+		{
+			if (!dest) return NULL;
+
+			DWORD length = GetModuleFileName(NULL, dest, destSize);
+			PathRemoveFileSpec(dest);
+			return dest;
+		}
+
 
 		void InitialiseSystems()
 		{
@@ -171,6 +193,37 @@ namespace LSys
 			{
 				camera->get_node()->translate(octet::vec3(0.0f, 0.0f, cameraVelocity));
 			}
+
+			if (is_key_down('K'))
+			{
+				systems[currentSystemIndex]->distance -= 0.01f;
+				renderer->Rebuild(systems[currentSystemIndex]);
+			}
+			if (is_key_down('L'))
+			{
+				systems[currentSystemIndex]->distance += 0.01f;
+				renderer->Rebuild(systems[currentSystemIndex]);
+			}
+
+			if (is_key_down('H'))
+			{
+				systems[currentSystemIndex]->angle -= 1.0f;
+				renderer->Rebuild(systems[currentSystemIndex]);
+			}
+			if (is_key_down('J'))
+			{
+				systems[currentSystemIndex]->angle += 1.0f;
+				renderer->Rebuild(systems[currentSystemIndex]);
+			}
+
+			if (is_key_going_down('C'))
+			{
+				systems[currentSystemIndex]->colour.x() = rnd->get(0.0f, 1.0f);
+				systems[currentSystemIndex]->colour.y() = rnd->get(0.0f, 1.0f);
+				systems[currentSystemIndex]->colour.z() = rnd->get(0.0f, 1.0f);
+				renderer->Rebuild(systems[currentSystemIndex]);
+			}
+
 		}
 	};
 }

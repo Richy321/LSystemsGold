@@ -17,12 +17,12 @@ namespace LSys
 		struct my_vertex 
 		{
 			octet::vec3p pos;
+			uint32_t color;
 		};
 
 	public:
 
 		octet::ref<octet::scene_node>node;
-		octet::ref<octet::material> green;
 		octet::ref<octet::mesh>mesh;
 
 		std::map<char, RenderActionType> SymbolActionMap;
@@ -37,24 +37,24 @@ namespace LSys
 		void Initialise(octet::visual_scene *app_scene, const LSystemInstance *system)
 		{
 			node = new octet::scene_node();
-			octet::param_shader *shader = NULL;//new octet::param_shader("shaders/default.vs", "shaders/simple_color.fs");
-			green = new octet::material(octet::vec4(0, 1, 0, 1), shader);
 			mesh = new octet::mesh();
+
+			octet::param_shader *shader = new octet::param_shader("shaders/default.vs", "shaders/simple_color.fs");
+			octet::material *colourMaterial = new octet::material(octet::vec4(0, 1, 0, 1), shader);
+
 			mesh->set_params(sizeof(my_vertex), 0, 0, GL_LINES, NULL);
 			mesh->add_attribute(octet::attribute_pos, 3, GL_FLOAT, 0);
 			mesh->add_attribute(octet::attribute_color, 4, GL_UNSIGNED_BYTE, 12, GL_TRUE);
+
 			Rebuild(system);
 		
 			app_scene->add_child(node);
-			app_scene->add_mesh_instance(new octet::mesh_instance(node, mesh, green));
+			app_scene->add_mesh_instance(new octet::mesh_instance(node, mesh, colourMaterial));
 		}
 
 		void Rebuild(const LSystemInstance *system)
 		{
 			const LSystemInstance::LSystemState *state = system->GetCurrentState();
-
-			size_t num_vertices = 100000;
-			size_t num_indices = num_vertices * 2;
 			
 			octet::dynarray<my_vertex> verts;
 
@@ -63,8 +63,6 @@ namespace LSys
 			renderNodeStack->push(identMat);
 
 			const char *result = state->getResult();
-
-			printf("result:%s", result);
 
 			octet::mat4t matrix;
 
@@ -75,12 +73,14 @@ namespace LSys
 					my_vertex vert;
 
 					vert.pos = renderNodeStack->top()[3].xyz();
+					vert.color = make_color(system->colour.x(), system->colour.y(), system->colour.z());
 					verts.push_back(vert);
 
 					my_vertex vertTop;
 
-					renderNodeStack->top().translate(octet::vec3(0.0f, translateAmount, 0.0f));
+					renderNodeStack->top().translate(octet::vec3(0.0f, system->distance, 0.0f));
 					vertTop.pos = renderNodeStack->top()[3].xyz();
+					vert.color = make_color(system->colour.x(), system->colour.y(), system->colour.z());
 					verts.push_back(vertTop);
 
 				}
@@ -104,7 +104,6 @@ namespace LSys
 			}
 			mesh->set_vertices(verts);
 		}
-
 	};
 }
 
