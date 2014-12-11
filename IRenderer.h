@@ -2,15 +2,6 @@
 #include "LSystemInstance.h"
 namespace LSys
 {
-	enum RenderActionType
-	{
-		Draw_Line,
-		Stack_Push,
-		Stack_Pop,
-		Turn_AntiClockwise,
-		Turn_Clockwise
-	};
-
 	class IRenderer
 	{
 	public:

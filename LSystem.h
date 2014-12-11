@@ -38,7 +38,6 @@ namespace LSys
 			app_scene = new octet::visual_scene();
 			app_scene->create_default_camera_and_lights();
 
-
 			rnd = new octet::random();
 
 			camera = app_scene->get_camera_instance(0);
@@ -58,7 +57,7 @@ namespace LSys
 			//GetThisPath(dest, MAX_PATH);
 
 			//DWORD a = GetCurrentDirectory(MAX_PATH, curDir);
-
+			//SetCurrentDirectory(
 			wchar_t path[MAX_PATH];
 			wsprintf(path, L"%s\\*.txt", dirPath);
 
@@ -98,11 +97,17 @@ namespace LSys
 			return dest;
 		}
 
-
 		void InitialiseSystems()
 		{
-			//TODO - remove fixed path
-			octet::dynarray<char*> files = GetFilesInDirectory(L"E:\\Projects\\octet\\octet\\src\\examples\\LSystem\\Systems");//"./src/examples/LSystem/systems");
+			octet::dynarray<const char*> files;
+			files.push_back("./src/examples/LSystem/systems/A.txt");
+			files.push_back("./src/examples/LSystem/systems/B.txt");
+			files.push_back("./src/examples/LSystem/systems/C.txt");
+			files.push_back("./src/examples/LSystem/systems/D.txt");
+			files.push_back("./src/examples/LSystem/systems/E.txt");
+			files.push_back("./src/examples/LSystem/systems/F.txt");
+			files.push_back("./src/examples/LSystem/systems/G_DragonCurve.txt");
+			files.push_back("./src/examples/LSystem/systems/H_SierpinskiTriangle.txt");
 
 			for (unsigned int i = 0; i < files.size(); i++)
 			{
@@ -133,7 +138,6 @@ namespace LSys
 			// draw the scene
 			app_scene->render((float)vx / vy);
 		}
-
 
 		void HandleInput()
 		{

@@ -71,25 +71,9 @@ namespace LSys
 		char* axiom;
 		const char* filePath;
 
-		octet::dynarray<char> currentSystem;
 		octet::dynarray<LSystemState*> states;
 
 		int currentStateIndex = 0;
-
-		//Grow char array with doubling
-		void Grow(char *arr)
-		{
-			Resize(arr, SIZEOF_ARRAY(arr) * 2);
-		}
-
-		void Resize(char * arr, int size)
-		{
-			char *newResult = new char[size];
-			memset(newResult, 0, sizeof(newResult));
-			strcpy(newResult, arr);
-			delete [] arr;
-			arr = newResult;
-		}
 
 		void Load(const char* filename)
 		{
@@ -173,7 +157,6 @@ namespace LSys
 
 							axiom = new char[size];
 							strcpy(axiom, tmpValueBuffer);
-							//memcpy(axiom, tmpValueBuffer, size);
 						}
 					}
 
@@ -195,12 +178,12 @@ namespace LSys
 								inst++;
 							}
 							size_t size = valuePtr - tmpValueBuffer + 1; //null terminator
-							char* rule = new char[size];
+							char* rule = (char*)malloc(sizeof(char) * size);
 							memcpy(rule, tmpValueBuffer, size);
 
 							//ruleMap
 							AddRuleToDictionary(rule);
-							delete[] rule;
+							free(rule);
 						}
 					}
 				}

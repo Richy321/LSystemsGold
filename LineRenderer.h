@@ -25,7 +25,7 @@ namespace LSys
 		octet::ref<octet::scene_node>node;
 		octet::ref<octet::mesh>mesh;
 
-		std::map<char, RenderActionType> SymbolActionMap;
+		//std::map<char, RenderActionType> SymbolActionMap;
 		LineRenderer()
 		{
 		}
